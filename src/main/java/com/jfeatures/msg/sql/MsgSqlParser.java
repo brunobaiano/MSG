@@ -211,12 +211,12 @@ public class MsgSqlParser {
             List<DBColumn> dbColumnsFromSubSelectJoinClause;
             List<DBColumn> dbColumnsFromSubSelectFromClause;
             Collection<Expression> onExpressions = join.getOnExpressions();
-            if(join.getRightItem() instanceof SubSelect)
+            if (join.getRightItem() instanceof SubSelect rightItem)
             {
                 try
                 {
-                    dbColumnsFromSubSelectFromClause = extractPredicateHavingLiteralsFromWhereClause(((SubSelect) join.getRightItem()).getSelectBody().toString(), ddlPerTableName);
-                    dbColumnsFromSubSelectJoinClause = extractPredicateHavingLiteralsFromJoinsClause(((SubSelect) join.getRightItem()).getSelectBody().toString(), ddlPerTableName);
+                    dbColumnsFromSubSelectFromClause = extractPredicateHavingLiteralsFromWhereClause(rightItem.getSelectBody().toString(), ddlPerTableName);
+                    dbColumnsFromSubSelectJoinClause = extractPredicateHavingLiteralsFromJoinsClause(rightItem.getSelectBody().toString(), ddlPerTableName);
                     result.addAll(dbColumnsFromSubSelectFromClause);
                     result.addAll(dbColumnsFromSubSelectJoinClause);
                 } catch (JSQLParserException e)
@@ -284,12 +284,12 @@ public class MsgSqlParser {
         Map<String, String> tableAliasToTableName = getAliasToTableName(plainSelect);
 
         plainSelect.getSelectItems().forEach(selectItem -> {
-            String columnName = ((Column) ((SelectExpressionItem) (selectItem)).getExpression()).getColumnName();
+            String columnName = ((Column) ((SelectExpressionItem) selectItem).getExpression()).getColumnName();
             //todo find better way to get table name, we are not getting this in case of column e as it does not have table alias along with column name.
-            String tableAlias = ((Column) ((SelectExpressionItem) (selectItem)).getExpression()).getTable() != null
-                    ? ((Column) ((SelectExpressionItem) (selectItem)).getExpression()).getTable().getName()
+            String tableAlias = ((Column) ((SelectExpressionItem) selectItem).getExpression()).getTable() != null
+                    ? ((Column) ((SelectExpressionItem) selectItem).getExpression()).getTable().getName()
                     : null;
-            String columnAliasName = ((SelectExpressionItem) (selectItem)).getAlias()!=null ? ((SelectExpressionItem) (selectItem)).getAlias().getName() : null;
+            String columnAliasName = ((SelectExpressionItem) selectItem).getAlias()!=null ? ((SelectExpressionItem) selectItem).getAlias().getName() : null;
 
             DBColumn dbColumn = getDbColumn(tableAlias, columnName, tableAliasToTableName, ddlPerTableName);
             result.put(new TableColumn(dbColumn.columnName(), columnAliasName ,tableAliasToTableName.get(tableAlias)), dbColumn);
